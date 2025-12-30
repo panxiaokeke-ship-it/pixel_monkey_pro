@@ -2,6 +2,7 @@
 export type ToolType = 'pen' | 'eraser' | 'fill' | 'picker' | 'pan';
 export type SymmetryMode = 'none' | 'vertical' | 'horizontal' | 'quad';
 export type ThemeType = 'gameboy' | 'cassette' | 'cyberpunk' | 'stealth';
+export type Language = 'zh' | 'en';
 
 export interface Layer {
   id: string;

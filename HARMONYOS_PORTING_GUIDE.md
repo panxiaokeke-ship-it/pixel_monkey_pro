@@ -1,56 +1,67 @@
-# 像素猴 (Pixel Monkey) 鸿蒙系统移植指南
 
-本文档旨在指导如何将基于 React + Tailwind 的 Web 应用迁移至鸿蒙 **ArkTS + ArkUI** 原生环境。
+# 像素猴 (Pixel Monkey) 鸿蒙原生移植详细指南
 
-## 1. 核心架构映射
+本指南旨在帮助开发者将本项目最快速度移植到 **HarmonyOS ArkTS + ArkUI** 环境，并保持 1:1 的视觉一致性。
 
-| Web 概念 | 鸿蒙 (HarmonyOS) 概念 | 说明 |
-| :--- | :--- | :--- |
-| HTML5 Canvas | `Canvas` 组件 + `CanvasRenderingContext2D` | 像素绘制逻辑基本一致，需注意离屏渲染以优化性能。 |
-| LocalStorage | `Preferences` (用户首选项) | 存储作品元数据与用户设置。 |
-| CSS Variables | `AppStorage` 或自定义 `ThemeModel` | 全局状态管理主题颜色。 |
-| Lucide Icons | 鸿蒙矢量图标库 或 `Image` 组件 | 建议将 SVG 转换为鸿蒙矢量图标或使用资源图片。 |
+## 1. 核心映射表 (Web to ArkUI)
 
-## 2. UI 移植深度解析 (关键)
+### 1.1 基础布局
+- **HTML Container** -> `Column` / `Row`
+- **Flex-1** -> `layoutWeight(1)`
+- **Overflow-Hidden** -> `clip(true)`
+- **Z-Index** -> `zIndex()`
 
-像素猴的 UI 充满了阴影、边框和特定材质感，在 ArkUI 中应按以下方式复刻：
+### 1.2 材质与阴影 (UI 核心)
+像素猴的复古感来源于“硬阴影”和“内阴影”。
+- **外阴影 (Box Shadow)**: 使用 `.shadow({ radius: 0, color: '#1a1a1a', offsetX: 4, offsetY: 4 })`。注意 `radius` 设为 0 以模拟像素风格。
+- **内阴影 (Inset Shadow)**: ArkUI 无直接 `inset shadow`，需使用 `Stack` 叠加。
+  - 底层：背景色。
+  - 中层：白色半透明渐变（左上）或黑色半透明（右下）。
+  - 顶层：内容。
 
-### A. 硬件边框与阴影 (Cassette Button)
-Web 中使用了 `box-shadow: inset ...`。在 ArkUI 中，推荐使用多层边框叠加或 `shadow` 属性。
-- **ArkUI 实现**:
+## 2. UI 资源处理 (图片化移植方案)
+为了保证移植后的 UI 高度一致且减少代码实现复杂度，建议将以下 CSS 模拟的 UI 资源直接转为图片使用：
+
+1. **CRT 扫描线纹理**: 
+   - 建议在 ArkUI 中使用一张 256x256 的重复平铺 PNG 图片作为全屏 OverLay。
+2. **按钮材质 (cassette-button)**: 
+   - 将按钮的常态、按下态分别截图导出为 9-Patch (点九图)，在鸿蒙中使用 `backgroundImage` 配合 `backgroundImageResizable`。
+3. **硬件外壳杂色 (Hardware Grain)**: 
+   - 导出 `hardware-beige` 颜色的噪点纹理图，作为各面板背景，比纯色更具质感。
+4. **图标 (Icons)**: 
+   - 建议统一导出为 SVG 或使用鸿蒙内置图标库，确保在不同分辨率下清晰。
+
+## 3. 布局逻辑优化
+在最新版本中，我们优化了 `Gallery` 页面的布局：
+- **标题区**: 移除了绝对定位的版本号标签，避免与标题文本发生重叠冲突。
+- **底部操作区**: 版本号标签（storageLabel）现在以较低的不透明度（30%）垂直居中显示在“初始化新单元”按钮的上方，既起到装饰作用又不干扰主操作流。
+
+## 4. 关键组件移植实现
+
+### 4.1 画布 (Canvas)
+- **ArkTS 核心**:
   ```typescript
-  Button()
-    .backgroundColor($r('app.color.hardware_beige'))
-    .border({ width: 2, color: $r('app.color.border_dark') })
-    .shadow({ radius: 0, color: '#7a7a6d', offsetX: 3, offsetY: 3 }) // 模拟硬阴影
+  Canvas(this.context)
+    .width('100%')
+    .aspectRatio(1)
+    .onReady(() => {
+       // 实现像素绘制逻辑：循环 data 数组调用 context.fillRect()
+    })
+    .imageSmoothingEnabled(false) // 关键：关闭图像平滑，保持像素感
   ```
 
-### B. 响应式布局 (Flex to Column/Row)
-像素猴的布局在 Web 中大量依赖 Tailwind 的 `flex-col`。
-- **移植策略**:
-  - 顶层使用 `Stack` 模拟 CRT 滤镜层叠。
-  - 内容区使用 `Column` 嵌套 `Row`。
-  - 针对折叠屏（华为 Mate X 系列），需使用 `Grid` 或 `Flex` 的动态权重实现画布自适应。
+### 4.2 手势交互 (Zoom & Pan)
+- 使用 `GestureGroup(GestureMode.Parallel)`。
+- `PinchGesture`: 控制 `scaleX` 和 `scaleY`。
+- `PanGesture`: 控制 `offsetX` 和 `offsetY`。
 
-### C. 画布手势控制 (Pan & Zoom)
-Web 使用了 `onWheel` 和 `onTouchStart` 手动计算。
-- **鸿蒙原生增强**:
-  - 使用 `PinchGesture` 处理双指缩放。
-  - 使用 `PanGesture` 处理单指平移（当工具为 Pan 时）。
-  - **注意**: 必须设置 `hitTestBehavior(HitTestMode.Block)` 来确保手势不与绘图冲突。
+## 5. 存储迁移
+- **Web**: `localStorage.getItem`
+- **HarmonyOS**: `preferences.getPreferences` (用户首选项)
+- 序列化方式一致：均使用 JSON 字符串存储。
 
-### D. AI 功能调用
-鸿蒙应用无法直接访问 `process.env`。
-- 请使用鸿蒙的 `http` 模块重新封装 `gemini.ts` 中的调用逻辑。
-- 确保护照权限已配置（网络访问权限 `ohos.permission.INTERNET`）。
-
-## 3. 性能优化建议
-
-1. **像素点渲染**: 对于 64x64 及以上的画布，避免使用 `ForEach` 渲染成千上万个小方块组件（鸿蒙 Component 树过深会导致卡顿）。**必须使用单 `Canvas` 进行绘图。**
-2. **主题切换**: 利用鸿蒙系统的 `Configuration` 变化监听，实现一键切换全局颜色方案，避免 UI 闪烁。
-3. **离屏绘制**: 在图层合并或导出图片时，使用 `OffscreenCanvas` 进行后台处理。
-
-## 4. 权限配置 (metadata.json)
-需要在鸿蒙工程的 `module.json5` 中声明：
-- `ohos.permission.INTERNET`: 调用 Gemini API。
-- `ohos.permission.WRITE_IMAGE_VIDEO`: 保存作品到相册。
+## 6. 开发者快速 CheckList
+- [ ] 将 CSS 样式中的 `box-shadow` 转换为 ArkUI 的 `.shadow` 属性。
+- [ ] 在 `resources/base/media` 中放入导出的按钮九宫格图。
+- [ ] 确保 `Canvas` 组件的渲染逻辑在 `onReady` 生命周期内执行。
+- [ ] 适配鸿蒙的底部安全区（SafeArea）。
