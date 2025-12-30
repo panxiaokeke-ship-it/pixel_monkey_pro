@@ -9,29 +9,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Default: Game Boy Theme */
-            --bg-color: #9ca3af;
+            /* Default: Game Boy Theme - Improved Contrast */
+            --bg-color: #88909b;
             --hardware-beige: #b5b5ad;
             --hardware-dark: #2d2d2d;
             --monitor-bg: #8bac0f;
-            --accent-orange: #306230;
+            --accent-orange: #1e3d1e; /* Darker green for better readability */
             --accent-blue: #0f380f;
             --led-green: #e0f8d0;
-            --text-color: #0f380f;
-            --border-color: #2d2d2d;
-            --panel-shadow: #8a8a7d;
+            --text-color: #081a08; /* Much darker for contrast */
+            --border-color: #1a1a1a;
+            --panel-shadow: #7a7a6d;
         }
 
         body.theme-cassette {
             --bg-color: #1a1b1e;
             --hardware-beige: #d1d1c4;
             --hardware-dark: #2a2b2e;
-            --monitor-bg: #0f1411;
-            --accent-orange: #ff6b00;
-            --accent-blue: #00d1ff;
+            --monitor-bg: #0a0e0b;
+            --accent-orange: #d35400; /* Richer orange */
+            --accent-blue: #0088cc;
             --led-green: #39ff14;
-            --text-color: #3b2111;
-            --border-color: #3b2111;
+            --text-color: #2c1810;
+            --border-color: #2c1810;
             --panel-shadow: #8a8a7d;
         }
 
@@ -43,29 +43,29 @@
             --accent-orange: #ff00ff;
             --accent-blue: #00ffff;
             --led-green: #39ff14;
-            --text-color: #d1d1c4;
+            --text-color: #f0f0f0; /* Light text on dark bg */
             --border-color: #ff00ff;
             --panel-shadow: #3b0a45;
         }
 
         body.theme-stealth {
             --bg-color: #000000;
-            --hardware-beige: #0a0a0a;
-            --hardware-dark: #111111;
+            --hardware-beige: #0f0f0f;
+            --hardware-dark: #1a1a1a;
             --monitor-bg: #050505;
-            --accent-orange: #444444;
-            --accent-blue: #333333;
+            --accent-orange: #bbbbbb; /* Higher contrast grey */
+            --accent-blue: #888888;
             --led-green: #39ff14;
-            --text-color: #666666;
-            --border-color: #333333;
-            --panel-shadow: #111111;
+            --text-color: #ffffff;
+            --border-color: #444444;
+            --panel-shadow: #000000;
         }
 
         body {
             font-family: 'JetBrains Mono', 'Pixelify Sans', monospace;
             background-color: var(--bg-color);
             color: var(--text-color);
-            overscroll-behavior-y: contain;
+            overscroll-behavior: none;
             user-select: none;
             -webkit-user-select: none;
             transition: background-color 0.3s ease;
@@ -73,21 +73,22 @@
         .crt-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.005), rgba(0, 0, 255, 0.01));
             background-size: 100% 3px, 3px 100%;
             pointer-events: none;
-            z-index: 100;
+            z-index: 1000;
         }
         .cassette-button {
             background: var(--hardware-beige);
-            box-shadow: inset -2px -2px 0px var(--panel-shadow), inset 2px 2px 0px rgba(255,255,255,0.2);
+            box-shadow: inset -3px -3px 0px var(--panel-shadow), inset 2px 2px 0px rgba(255,255,255,0.3);
             border: 2px solid var(--border-color);
             color: var(--text-color);
             transition: all 0.1s;
+            font-weight: 800;
         }
-        .cassette-button:active {
-            box-shadow: inset 2px 2px 0px var(--panel-shadow), inset -2px -2px 0px rgba(255,255,255,0.2);
+        .cassette-button:active:not(:disabled) {
+            box-shadow: inset 2px 2px 0px var(--panel-shadow), inset -1px -1px 0px rgba(255,255,255,0.1);
             transform: translateY(1px);
         }
         .hardware-panel {
@@ -95,33 +96,37 @@
             border: 4px solid var(--border-color);
             position: relative;
         }
-        .hardware-panel::after {
-            content: "";
-            position: absolute;
-            top: 2px; left: 2px; right: 2px; bottom: 2px;
-            border: 1px solid rgba(255,255,255,0.1);
-            pointer-events: none;
-        }
         .status-led {
             width: 8px; height: 8px;
             border-radius: 50%;
-            box-shadow: 0 0 5px currentColor;
+            box-shadow: 0 0 8px currentColor;
         }
         canvas {
             image-rendering: pixelated;
         }
         .label-tag {
             background: #fff;
-            color: #000;
+            color: #000 !important;
             padding: 2px 8px;
             font-size: 10px;
-            font-weight: bold;
+            font-weight: 900;
             text-transform: uppercase;
-            box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
             border-left: 4px solid var(--accent-orange);
         }
         .theme-transition {
             transition: all 0.3s ease;
+        }
+        /* Custom scrollbar for better visual integration */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--hardware-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-orange);
+            border: 1px solid var(--border-color);
         }
     </style>
 <script type="importmap">
