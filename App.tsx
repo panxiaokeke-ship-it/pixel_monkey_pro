@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Gallery } from './components/Gallery';
 import { Editor } from './components/Editor';
@@ -21,7 +20,11 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen w-full flex items-center justify-center bg-[var(--bg-color)] overflow-hidden">
-      <div className="h-full w-full md:max-w-4xl lg:max-w-6xl md:aspect-[3/4] lg:aspect-video relative overflow-hidden bg-[var(--bg-color)] md:shadow-[0_0_100px_rgba(0,0,0,0.5)] md:border-x-8 md:border-[var(--border-color)] theme-transition">
+      {/* 
+        Responsive Container: 
+        - Occupies full width and height to eliminate "dead zones" on desktop and tablets.
+      */}
+      <div className="h-full w-full relative overflow-hidden bg-[var(--bg-color)] md:border-x-4 lg:border-x-8 border-[var(--border-color)] theme-transition">
         {!currentArt ? (
           <Gallery onSelect={setCurrentArt} />
         ) : (
