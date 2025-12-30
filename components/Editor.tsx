@@ -18,6 +18,47 @@ interface EditorProps {
   onSetTheme: (theme: ThemeType) => void;
 }
 
+// Sub-components defined first to avoid ReferenceError during component initialization
+const SidebarToolButton: React.FC<{ active: boolean, onClick: () => void, icon: React.ReactNode, label: string }> = ({ active, onClick, icon, label }) => (
+  <button 
+    onClick={onClick}
+    className={`w-full flex flex-col items-center justify-center py-4 border-4 transition-all relative ${active ? 'bg-[var(--accent-orange)] border-white text-white translate-x-1.5' : 'bg-white border-[var(--border-color)] text-[var(--text-color)] shadow-[4px_0_0_0_var(--panel-shadow)] hover:-translate-y-1'}`}
+  >
+    {icon}
+    <span className="text-[9px] font-black mt-2">{label}</span>
+  </button>
+);
+
+const IconButton: React.FC<{ active?: boolean, onClick: () => void, icon: React.ReactNode, title: string, color?: string }> = ({ active, onClick, icon, title, color = "text-[var(--text-color)]" }) => (
+  <button 
+    onClick={onClick}
+    className={`p-2 transition-all hover:bg-white/20 active:scale-90 relative group ${active ? 'bg-white/30 shadow-inner' : ''} ${color}`}
+    title={title}
+  >
+    {icon}
+    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity font-black uppercase whitespace-nowrap z-[100]">
+      {title}
+    </span>
+  </button>
+);
+
+const ControlDeckButton: React.FC<{ active: boolean, onClick: () => void, icon: React.ReactNode, label: string }> = ({ active, onClick, icon, label }) => (
+  <button 
+    onClick={onClick}
+    className={`flex-1 flex flex-col items-center justify-center py-4 border-4 transition-all ${active ? 'bg-[var(--accent-orange)] border-white text-white translate-y-1 shadow-none' : 'bg-[var(--hardware-beige)] border-[var(--border-color)] text-[var(--text-color)] shadow-[0_4px_0_0_var(--panel-shadow)] active:translate-y-1 active:shadow-none'}`}
+  >
+    {icon}
+    <span className="text-[10px] font-black mt-2 tracking-tight">{label}</span>
+  </button>
+);
+
+const ThemeButton: React.FC<{ active: boolean, onClick: () => void, label: string, color: string }> = ({ active, onClick, label, color }) => (
+  <button onClick={onClick} className={`p-5 border-4 flex flex-col items-center gap-3 transition-all ${active ? 'border-[var(--accent-orange)] bg-white/10 scale-105 shadow-md' : 'border-[var(--panel-shadow)] opacity-50 hover:opacity-100'}`}>
+     <div className="w-10 h-10 border-4 border-black/30 shadow-inner" style={{ backgroundColor: color }}></div>
+     <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
+  </button>
+);
+
 export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSetTheme }) => {
   const [layers, setLayers] = useState<Layer[]>(art.layers);
   const [activeLayerIndex, setActiveLayerIndex] = useState(0);
@@ -84,15 +125,6 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
     setHistoryIndex(nextHist.length - 1);
     isChangedRef.current = false;
   }, [history, historyIndex]);
-
-  const handleSave = useCallback(async () => {
-    setIsSaving(true);
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const preview = canvas.toDataURL();
-    saveArt({ ...art, layers, preview });
-    setTimeout(() => setIsSaving(false), 800);
-  }, [art, layers]);
 
   const handleAction = useCallback((index: number, overrideColor?: string) => {
     const activeLayer = layersRef.current[activeIndexRef.current];
@@ -298,40 +330,14 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
     }
   }, [history, historyIndex]);
 
-  // Keyboard Shortcuts Implementation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      const key = e.key.toLowerCase();
-      const ctrlOrMeta = e.ctrlKey || e.metaKey;
-
-      if (key === 'p') setCurrentTool('pen');
-      if (key === 'e') setCurrentTool('eraser');
-      if (key === 'f') setCurrentTool('fill');
-      if (key === 'i') setCurrentTool('picker');
-      if (key === ' ') {
-        e.preventDefault();
-        setCurrentTool('pan');
-      }
-
-      if (ctrlOrMeta && key === 'z') {
-        e.preventDefault();
-        undo();
-      } else if ((ctrlOrMeta && key === 'y') || (ctrlOrMeta && e.shiftKey && key === 'z')) {
-        e.preventDefault();
-        redo();
-      } else if (ctrlOrMeta && key === 's') {
-        e.preventDefault();
-        handleSave();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, handleSave]);
+  const handleSave = useCallback(async () => {
+    setIsSaving(true);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const preview = canvas.toDataURL();
+    saveArt({ ...art, layers, preview });
+    setTimeout(() => setIsSaving(false), 800);
+  }, [art, layers]);
 
   const handleExportPNG = () => {
     const canvas = canvasRef.current;
@@ -392,7 +398,7 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
     setSymmetryMode(modes[nextIndex]);
   };
 
-  const getSymmetryIcon = (mode: string, size = 20) => {
+  const getSymmetryIcon = (mode: string, size = 18) => {
     switch (mode) {
       case 'vertical': return <Columns size={size} />;
       case 'horizontal': return <Rows size={size} />;
@@ -404,32 +410,39 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
   return (
     <div className="flex flex-col md:flex-row h-screen bg-[var(--bg-color)] text-[var(--text-color)] theme-transition select-none overflow-hidden">
       
-      {/* Sidebar Tool (Left) */}
+      {/* Sidebar Tool (Left) - Desktop only */}
       <div className="hidden md:flex flex-col w-20 lg:w-24 bg-[var(--hardware-beige)] border-r-8 border-[var(--panel-shadow)] p-3 items-center gap-4 z-50">
         <button onClick={onBack} className="cassette-button p-3 hover:scale-110 transition-all mb-4">
           <ArrowLeft size={24} />
         </button>
-        <SidebarToolButton active={currentTool === 'pen'} onClick={() => setCurrentTool('pen')} icon={<PenTool size={28} />} label="PEN (P)" />
-        <SidebarToolButton active={currentTool === 'eraser'} onClick={() => setCurrentTool('eraser')} icon={<Eraser size={28} />} label="DEL (E)" />
-        <SidebarToolButton active={currentTool === 'fill'} onClick={() => setCurrentTool('fill')} icon={<PaintBucket size={28} />} label="FILL (F)" />
-        <SidebarToolButton active={currentTool === 'picker'} onClick={() => setCurrentTool('picker')} icon={<Pipette size={28} />} label="PICK (I)" />
-        <SidebarToolButton active={currentTool === 'pan'} onClick={() => setCurrentTool('pan')} icon={<Hand size={28} />} label="PAN (SPC)" />
+        <SidebarToolButton active={currentTool === 'pen'} onClick={() => setCurrentTool('pen')} icon={<PenTool size={28} />} label="PEN" />
+        <SidebarToolButton active={currentTool === 'eraser'} onClick={() => setCurrentTool('eraser')} icon={<Eraser size={28} />} label="DEL" />
+        <SidebarToolButton active={currentTool === 'fill'} onClick={() => setCurrentTool('fill')} icon={<PaintBucket size={28} />} label="FILL" />
+        <SidebarToolButton active={currentTool === 'picker'} onClick={() => setCurrentTool('picker')} icon={<Pipette size={28} />} label="PICK" />
+        <SidebarToolButton active={currentTool === 'pan'} onClick={() => setCurrentTool('pan')} icon={<Hand size={28} />} label="PAN" />
         <div className="mt-auto flex flex-col gap-3">
           <button onClick={() => setShowSettings(true)} className="p-3 border-2 border-[var(--border-color)] bg-[var(--hardware-beige)] hover:bg-black/10 transition-all rounded-sm shadow-[2px_2px_0_0_black]"><MoreHorizontal size={24} /></button>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col h-full relative">
-        {/* Mobile Header */}
-        <header className="p-4 md:hidden bg-[var(--hardware-beige)] border-b-4 border-[var(--border-color)] flex justify-between items-center text-[var(--text-color)] z-[100]">
+        {/* Mobile Header / Desktop Info Bar */}
+        <header className="p-4 bg-[var(--hardware-beige)] border-b-4 border-[var(--panel-shadow)] flex justify-between items-center text-[var(--text-color)] z-40">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="cassette-button p-1">
+            <button onClick={onBack} className="md:hidden cassette-button p-1">
               <ArrowLeft size={24} />
             </button>
-            <h2 className="font-black italic uppercase text-sm leading-none truncate max-w-[100px]">{art.name}</h2>
+            <div className="flex flex-col md:flex-row md:items-center md:gap-4">
+              <h2 className="font-black italic uppercase text-sm md:text-xl truncate max-w-[120px] md:max-w-none">{art.name}</h2>
+              <span className="hidden sm:inline-block label-tag !text-[8px] md:!text-[10px]">UNIT: {art.width}x{art.height}</span>
+            </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setShowLayersMobile(true)} className="cassette-button p-2">
+            <div className="hidden md:flex gap-3 mr-2 border-r-2 border-[var(--panel-shadow)] pr-4">
+               <button onClick={undo} disabled={historyIndex === 0} className="cassette-button px-4 py-1 text-[10px] font-black disabled:opacity-30">UNDO</button>
+               <button onClick={redo} disabled={historyIndex === history.length - 1} className="cassette-button px-4 py-1 text-[10px] font-black disabled:opacity-30">REDO</button>
+            </div>
+            <button onClick={() => setShowLayersMobile(true)} className="md:hidden cassette-button p-2">
               <LayersIcon size={20} />
             </button>
             <button onClick={() => setShowSettings(true)} className="cassette-button p-2">
@@ -438,27 +451,15 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
           </div>
         </header>
 
-        {/* Desktop Header */}
-        <header className="hidden md:flex p-4 bg-[var(--hardware-beige)] border-b-4 border-[var(--panel-shadow)] justify-between items-center text-[var(--text-color)] z-40">
-           <div className="flex items-center gap-4">
-              <h2 className="font-black italic uppercase text-xl leading-none">{art.name}</h2>
-              <span className="label-tag">Unit: {art.width}x{art.height}</span>
-           </div>
-           <div className="flex gap-4">
-              <button onClick={undo} disabled={historyIndex === 0} className="cassette-button px-6 py-2 text-xs font-black disabled:opacity-30">UNDO (Ctrl+Z)</button>
-              <button onClick={redo} disabled={historyIndex === history.length - 1} className="cassette-button px-6 py-2 text-xs font-black disabled:opacity-30">REDO (Ctrl+Y)</button>
-           </div>
-        </header>
-
-        {/* Canvas Toolbar (New: Above the canvas) */}
-        <div className="bg-[var(--hardware-beige)]/50 backdrop-blur-md border-b-2 border-[var(--border-color)] p-2 flex items-center justify-center gap-2 overflow-x-auto no-scrollbar z-30">
+        {/* Canvas Toolbar - Above Viewport */}
+        <div className="bg-[var(--hardware-beige)]/60 backdrop-blur-md border-b-2 border-[var(--border-color)] p-2 flex items-center justify-center gap-2 overflow-x-auto no-scrollbar z-30">
           <div className="flex bg-black/10 p-1 border-2 border-[var(--border-color)] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.5)]">
             <IconButton onClick={() => setZoom(prev => Math.min(prev * 1.2, 20))} icon={<ZoomIn size={18} />} title="Zoom In" />
             <IconButton onClick={() => setZoom(prev => Math.max(prev * 0.8, 0.5))} icon={<ZoomOut size={18} />} title="Zoom Out" />
             <IconButton onClick={resetZoom} icon={<Maximize size={18} />} title="Reset Zoom" />
           </div>
 
-          <div className="h-8 w-px bg-[var(--panel-shadow)] mx-1"></div>
+          <div className="h-6 w-px bg-[var(--panel-shadow)] mx-1"></div>
 
           <div className="flex bg-black/10 p-1 border-2 border-[var(--border-color)]">
             <IconButton active={showGrid} onClick={() => setShowGrid(!showGrid)} icon={<Grid3X3 size={18} />} title="Grid" />
@@ -466,15 +467,285 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
             <IconButton onClick={() => { setShowInspiration(true); getAIInspiration().then(setAiTip); }} icon={<Zap size={18} fill={aiTip ? "currentColor" : "none"} />} title="AI Tips" color="text-yellow-500" />
           </div>
 
-          <div className="h-8 w-px bg-[var(--panel-shadow)] mx-1"></div>
+          <div className="h-6 w-px bg-[var(--panel-shadow)] mx-1"></div>
 
           <div className="flex bg-black/10 p-1 border-2 border-[var(--border-color)]">
-            <IconButton onClick={handleSave} icon={<Download size={18} />} title="Save (Ctrl+S)" color="text-blue-500" />
+            <IconButton onClick={handleSave} icon={<Download size={18} />} title="Save" color="text-blue-500" />
             <IconButton onClick={handleExportPNG} icon={<ImageDown size={18} />} title="Export" color="text-orange-500" />
           </div>
         </div>
 
-        {/* Monitor Area */}
+        {/* Drawing Canvas Area */}
         <div 
           ref={viewportRef}
-          className="flex-1 bg-[var(--monitor-bg)] flex items-center justify-center p-4 md:p-10 relative overflow-hidden touch-none
+          className="flex-1 bg-[var(--monitor-bg)] flex items-center justify-center p-4 md:p-8 relative overflow-hidden touch-none"
+          onWheel={handleWheel}
+          onMouseDown={startDragging}
+          onMouseMove={onDrag}
+          onMouseUp={stopDragging}
+          onMouseLeave={stopDragging}
+          onTouchStart={startDragging}
+          onTouchMove={onDrag}
+          onTouchEnd={stopDragging}
+        >
+          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'linear-gradient(var(--led-green) 1px, transparent 1px), linear-gradient(90deg, var(--led-green) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+          
+          <div 
+            className="relative p-2 bg-[var(--hardware-beige)] border-4 border-[var(--border-color)] rounded-sm shadow-[0_0_80px_rgba(0,0,0,0.8)] transition-transform duration-75 ease-out"
+            style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
+          >
+             <canvas 
+              ref={canvasRef}
+              width={art.width}
+              height={art.height}
+              className="w-[85vw] max-w-[320px] md:max-w-[450px] aspect-square bg-white pointer-events-none shadow-sm"
+            />
+            {symmetryMode !== 'none' && (
+              <div className="absolute inset-2 pointer-events-none z-30 opacity-40">
+                {(symmetryMode === 'vertical' || symmetryMode === 'quad') && <div className="absolute left-1/2 top-0 bottom-0 w-[2px] bg-[var(--accent-orange)] -translate-x-1/2"></div>}
+                {(symmetryMode === 'horizontal' || symmetryMode === 'quad') && <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-[var(--accent-orange)] -translate-y-1/2"></div>}
+              </div>
+            )}
+            {showGrid && (
+              <div className="absolute inset-2 pointer-events-none z-20" style={{ backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.2) 1px, transparent 1px)`, backgroundSize: `${100 / art.width}% ${100 / art.height}%` }} />
+            )}
+          </div>
+
+          <div className="absolute bottom-4 left-6 font-mono text-[9px] text-[var(--led-green)] font-black opacity-90 space-y-1 drop-shadow-[0_2px_2px_black] bg-black/20 p-2 border-l-2 border-[var(--led-green)]">
+            <p>RES: {art.width}X{art.height}</p>
+            <p>MAG: {Math.round(zoom * 100)}%</p>
+            <p>LAY: {activeLayerIndex + 1}/{layers.length}</p>
+          </div>
+        </div>
+
+        {/* Mobile Control Panel (Bottom) */}
+        <div className="md:hidden bg-[var(--hardware-beige)] border-t-8 border-[var(--panel-shadow)] p-4 safe-bottom text-[var(--text-color)] z-[100]">
+          <div className="flex items-center gap-4 mb-4">
+             <div className="flex-1 flex gap-2">
+                <button onClick={undo} disabled={historyIndex === 0} className="cassette-button flex-1 py-3 font-black text-[10px] disabled:opacity-30 flex items-center justify-center gap-1 uppercase">
+                  <Undo2 size={14} /> Undo
+                </button>
+                <button onClick={redo} disabled={historyIndex === history.length - 1} className="cassette-button flex-1 py-3 font-black text-[10px] disabled:opacity-30 flex items-center justify-center gap-1 uppercase">
+                  Redo <Redo2 size={14} />
+                </button>
+             </div>
+             
+             <div 
+                className="flex items-center gap-2 bg-[var(--hardware-dark)] p-2 border-4 border-[var(--border-color)] active:scale-95 cursor-pointer shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]"
+                onClick={() => (document.querySelector('input[type="color"]') as HTMLInputElement)?.click()}
+             >
+                <div className="w-8 h-8 shrink-0 border-2 border-white" style={{ backgroundColor: currentColor }}></div>
+                <input type="color" value={currentColor} onChange={(e) => setCurrentColor(e.target.value)} className="w-0 h-0 opacity-0 absolute pointer-events-none" />
+                <span className="font-mono text-[10px] text-[var(--led-green)] font-black">{currentColor.toUpperCase()}</span>
+             </div>
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+            {(aiTip?.palette || defaultPalette).map((c, i) => (
+              <button 
+                key={i} 
+                onClick={() => setCurrentColor(c)} 
+                className={`w-10 h-10 shrink-0 border-4 transition-all ${currentColor === c ? 'border-white scale-110 z-10 shadow-lg' : 'border-[var(--border-color)]'}`} 
+                style={{ backgroundColor: c }} 
+              />
+            ))}
+          </div>
+
+          <div className="flex justify-between gap-1.5 border-t-4 border-[var(--panel-shadow)] pt-4">
+            <ControlDeckButton active={currentTool === 'pen'} onClick={() => setCurrentTool('pen')} icon={<PenTool size={22} />} label="PEN" />
+            <ControlDeckButton active={currentTool === 'eraser'} onClick={() => setCurrentTool('eraser')} icon={<Eraser size={22} />} label="DEL" />
+            <ControlDeckButton active={currentTool === 'fill'} onClick={() => setCurrentTool('fill')} icon={<PaintBucket size={22} />} label="FILL" />
+            <ControlDeckButton active={currentTool === 'picker'} onClick={() => setCurrentTool('picker')} icon={<Pipette size={22} />} label="PICK" />
+            <ControlDeckButton active={currentTool === 'pan'} onClick={() => setCurrentTool('pan')} icon={<Hand size={22} />} label="PAN" />
+          </div>
+        </div>
+
+        {/* Desktop Right Sidebar: Layers & Colors */}
+        <div className="hidden md:flex flex-col w-64 lg:w-72 bg-[var(--hardware-beige)] border-l-8 border-[var(--panel-shadow)] absolute right-0 h-full p-5 z-40 overflow-y-auto">
+           <div className="mb-6">
+              <label className="block text-[10px] font-black uppercase mb-2 tracking-widest text-[var(--panel-shadow)]">ACTIVE_COLOR</label>
+              <div 
+                className="w-full aspect-video border-4 border-[var(--border-color)] shadow-[inset_2px_2px_8px_rgba(0,0,0,0.3)] relative flex items-center justify-center group cursor-pointer mb-4"
+                style={{ backgroundColor: currentColor }}
+                onClick={() => (document.querySelector('input[type="color"]') as HTMLInputElement)?.click()}
+              >
+                 <div className="bg-black/60 px-3 py-1 font-mono text-white text-[10px] font-black backdrop-blur-sm border-2 border-white/20 group-hover:scale-105 transition-transform">
+                    {currentColor.toUpperCase()}
+                 </div>
+                 <input type="color" value={currentColor} onChange={(e) => setCurrentColor(e.target.value)} className="w-0 h-0 opacity-0 absolute" />
+              </div>
+              <div className="grid grid-cols-5 gap-1.5">
+                {(aiTip?.palette || defaultPalette).map((c, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => setCurrentColor(c)} 
+                    className={`aspect-square border-2 transition-all ${currentColor === c ? 'border-white scale-110 shadow-md ring-2 ring-[var(--accent-orange)]' : 'border-[var(--border-color)] hover:scale-105'}`} 
+                    style={{ backgroundColor: c }} 
+                  />
+                ))}
+              </div>
+           </div>
+
+           <div className="flex-1 flex flex-col min-h-0 mb-6 bg-black/5 p-2 border-2 border-[var(--panel-shadow)]">
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--panel-shadow)]">LAYERS</label>
+                <button onClick={addLayer} className="p-1 bg-[var(--accent-orange)] text-white border-2 border-[var(--border-color)] hover:scale-110 shadow-[2px_2px_0_0_black] transition-all">
+                  <Plus size={16} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scroll">
+                {[...layers].reverse().map((layer, revIdx) => {
+                  const index = layers.length - 1 - revIdx;
+                  const isActive = activeLayerIndex === index;
+                  return (
+                    <div 
+                      key={layer.id} 
+                      onClick={() => setActiveLayerIndex(index)}
+                      className={`p-2 border-2 flex items-center gap-2 transition-all cursor-pointer ${isActive ? 'bg-[var(--accent-orange)] text-white border-white scale-[1.02]' : 'bg-white/40 border-[var(--border-color)] opacity-70 hover:opacity-100'}`}
+                    >
+                      <button onClick={(e) => { e.stopPropagation(); toggleLayerVisibility(index); }} className="p-1 hover:bg-black/10">
+                        {layer.visible ? <Eye size={14} /> : <EyeOff size={14} />}
+                      </button>
+                      <span className="text-[10px] font-black uppercase truncate flex-1">{layer.name}</span>
+                      <div className="flex flex-col gap-0.5">
+                        <button onClick={(e) => { e.stopPropagation(); moveLayer(index, 'up'); }} className="p-0.5"><ArrowUp size={10} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); moveLayer(index, 'down'); }} className="p-0.5"><ArrowDown size={10} /></button>
+                      </div>
+                      {layers.length > 1 && (
+                        <button onClick={(e) => { e.stopPropagation(); deleteLayer(index); }} className="p-1 text-red-600">
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+           </div>
+
+           <div className="space-y-4 pt-4 border-t-4 border-[var(--panel-shadow)]">
+              <div className="bg-[var(--hardware-dark)] p-3 border-2 border-[var(--border-color)]">
+                <span className="block text-[8px] font-black text-white uppercase mb-2 opacity-60">BRUSH_SIZE</span>
+                <input 
+                  type="range" min="1" max="10" value={brushSize} 
+                  onChange={(e) => setBrushSize(parseInt(e.target.value))} 
+                  className="w-full accent-[var(--accent-orange)] h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between mt-1 text-[8px] font-black text-[var(--led-green)] font-mono">
+                  <span>1PX</span>
+                  <span>{brushSize}PX</span>
+                  <span>10PX</span>
+                </div>
+              </div>
+
+              <button onClick={handleSave} className="w-full bg-[var(--accent-orange)] text-white p-4 font-black uppercase border-4 border-[var(--border-color)] shadow-[4px_4px_0px_var(--border-color)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-3">
+                 <Save size={20} /> <span>SAVE ALL</span>
+              </button>
+           </div>
+        </div>
+      </div>
+
+      {/* Layer Modal Mobile */}
+      {showLayersMobile && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-6 z-[300]">
+           <div className="bg-[var(--hardware-beige)] border-4 border-[var(--border-color)] p-6 w-full max-w-sm text-[var(--text-color)]">
+              <div className="flex justify-between items-center mb-6 border-b-4 border-[var(--panel-shadow)] pb-2">
+                 <h2 className="text-lg font-black uppercase tracking-tight">Layers</h2>
+                 <button onClick={() => setShowLayersMobile(false)} className="p-1"><X size={24} /></button>
+              </div>
+              <div className="space-y-3 mb-6 max-h-[50vh] overflow-y-auto pr-2">
+                {[...layers].reverse().map((layer, revIdx) => {
+                  const index = layers.length - 1 - revIdx;
+                  const isActive = activeLayerIndex === index;
+                  return (
+                    <div 
+                      key={layer.id} 
+                      onClick={() => { setActiveLayerIndex(index); setShowLayersMobile(false); }}
+                      className={`p-3 border-2 flex items-center gap-3 ${isActive ? 'bg-[var(--accent-orange)] text-white border-white scale-105' : 'bg-white/40 border-[var(--border-color)]'}`}
+                    >
+                      <button onClick={(e) => { e.stopPropagation(); toggleLayerVisibility(index); }} className="p-1">
+                        {layer.visible ? <Eye size={18} /> : <EyeOff size={18} />}
+                      </button>
+                      <span className="font-black uppercase text-xs flex-1 truncate">{layer.name}</span>
+                      <div className="flex gap-4">
+                        <button onClick={(e) => { e.stopPropagation(); moveLayer(index, 'up'); }}><ArrowUp size={18} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); moveLayer(index, 'down'); }}><ArrowDown size={18} /></button>
+                        {layers.length > 1 && (
+                          <button onClick={(e) => { e.stopPropagation(); deleteLayer(index); }} className="text-red-500"><Trash2 size={18} /></button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <button onClick={addLayer} className="w-full bg-[var(--accent-orange)] text-white p-4 border-2 border-[var(--border-color)] font-black uppercase shadow-[4px_4px_0_0_black]">NEW LAYER</button>
+           </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-6 z-[400]">
+           <div className="bg-[var(--hardware-beige)] border-8 border-[var(--border-color)] p-10 w-full max-w-md text-[var(--text-color)] shadow-[20px_20px_0px_rgba(0,0,0,0.5)]">
+              <div className="flex justify-between items-center mb-8 border-b-8 border-[var(--panel-shadow)] pb-4">
+                 <div className="flex items-center gap-4">
+                    <Cpu size={32} className="text-[var(--accent-orange)]" />
+                    <h2 className="text-2xl font-black uppercase tracking-tight">CONFIG</h2>
+                 </div>
+                 <button onClick={() => setShowSettings(false)} className="p-2"><X size={36} /></button>
+              </div>
+
+              <div className="space-y-8">
+                 <div>
+                    <label className="block text-[10px] font-black uppercase mb-4 tracking-widest text-[var(--panel-shadow)]">VISUAL_PROFILE</label>
+                    <div className="grid grid-cols-2 gap-4">
+                       <ThemeButton active={currentTheme === 'gameboy'} onClick={() => onSetTheme('gameboy')} label="DMG-01" color="#8bac0f" />
+                       <ThemeButton active={currentTheme === 'cassette'} onClick={() => onSetTheme('cassette')} label="Mk-II" color="#ff6b00" />
+                       <ThemeButton active={currentTheme === 'cyberpunk'} onClick={() => onSetTheme('cyberpunk')} label="Neon" color="#ff00ff" />
+                       <ThemeButton active={currentTheme === 'stealth'} onClick={() => onSetTheme('stealth')} label="Night" color="#333333" />
+                    </div>
+                 </div>
+
+                 <div className="pt-6 border-t-8 border-[var(--panel-shadow)]">
+                    <button onClick={handleSave} className="w-full bg-[var(--accent-orange)] p-5 border-4 border-[var(--border-color)] text-white font-black uppercase text-xl shadow-[6px_6px_0px_var(--border-color)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-4">
+                       {isSaving ? <Check size={28} /> : <Save size={28} />}
+                       <span>{isSaving ? 'SAVED' : 'SAVE_ALL'}</span>
+                    </button>
+                 </div>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* AI Inspiration Overlay */}
+      {showInspiration && (
+        <div className="fixed inset-0 bg-black/98 flex items-center justify-center p-6 z-[500]">
+           <div className="bg-black border-4 border-[var(--led-green)] p-10 w-full max-w-lg relative shadow-[0_0_60px_var(--led-green)]">
+              <div className="absolute -top-6 left-10 label-tag !bg-[var(--led-green)] !text-black !text-xs">NEURAL_LINK_ACTIVE</div>
+              {aiTip ? (
+                <div className="space-y-10">
+                  <div className="font-mono text-lg leading-relaxed text-white">
+                    <span className="block text-[10px] text-[var(--led-green)] opacity-70 mb-4 animate-pulse">> IDEA_STREAM:</span>
+                    <span className="bg-[var(--led-green)] text-black px-2 py-1 font-black">{aiTip.idea}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-[var(--led-green)] opacity-70 mb-4">> SPECTRAL_PALETTE:</span>
+                    <div className="grid grid-cols-5 gap-4">
+                      {aiTip.palette.map((c, i) => (
+                        <button key={i} onClick={() => {setCurrentColor(c); setShowInspiration(false);}} className={`aspect-square border-4 transition-all ${currentColor === c ? 'border-[var(--led-green)] scale-110 shadow-[0_0_20px_var(--led-green)]' : 'border-white/20'}`} style={{ backgroundColor: c }} />
+                      ))}
+                    </div>
+                  </div>
+                  <button onClick={() => setShowInspiration(false)} className="w-full py-5 border-4 border-[var(--led-green)] text-[var(--led-green)] font-black uppercase text-xl hover:bg-[var(--led-green)] hover:text-black transition-all">DISMISS</button>
+                </div>
+              ) : (
+                <div className="py-20 flex flex-col items-center">
+                  <div className="w-14 h-14 border-8 border-[var(--led-green)] border-t-transparent rounded-full animate-spin"></div>
+                  <p className="mt-10 font-mono text-[var(--led-green)] animate-pulse text-lg font-black tracking-widest uppercase">Fetching...</p>
+                </div>
+              )}
+           </div>
+        </div>
+      )}
+    </div>
+  );
+};
