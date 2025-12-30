@@ -1,0 +1,7 @@
+{
+  "name": "Pixel Monkey (像素猴)",
+  "description": "A mobile-first pixel art drawing tool featuring artwork management, advanced editing tools, and AI-powered inspiration.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
