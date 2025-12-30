@@ -1,20 +1,29 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Pixel Monkey (像素猴) 🐒
 
-# Run and deploy your AI Studio app
+Pixel Monkey 是一款专为手机竖屏设计的专业级像素画绘制工具。它不仅提供了多图层、对称绘图等硬核功能，还融合了复古电子产品的工业设计美学（Retro-Hardware Aesthetic）。
 
-This contains everything you need to run your app locally.
+## 🌟 核心特性
 
-View your app in AI Studio: https://ai.studio/apps/drive/1Grob2eYgp8w3VRc4an16NISmFIfWLGTn
+- **多主题硬件外壳**：内置 GameBoy (DMG-01)、复古卡带 (Cassette)、赛博朋克 (Cyberpunk) 和隐身黑 (Stealth) 四种视觉风格，每一套主题都包含独立的调色板和 UI 质感。
+- **高级绘图引擎**：
+  - 支持多图层管理（显示/隐藏、排序、增删）。
+  - 四种对称模式：无、垂直、水平、镜像。
+  - 智能油漆桶、吸色器及可调尺寸的画笔。
+  - 平滑的画布缩放与位移拖拽。
+- **AI 灵感引擎**：集成 Google Gemini API，为创作者提供即时的绘画主题构思及配套的 5 色调色板建议。
+- **移动端优化**：完全针对竖屏操作优化，单手即可完成大部分绘图控制。
+- **本地化存储**：作品自动序列化存储于浏览器本地，支持导出为 PNG。
 
-## Run Locally
+## 🛠️ 技术栈
 
-**Prerequisites:**  Node.js
+- **框架**: React 19
+- **样式**: Tailwind CSS (利用 CSS 变量实现动态主题切换)
+- **图标**: Lucide React
+- **智能**: Google Gemini API (Gemini-3-Flash)
+- **部署**: ESM 模块化加载，兼容移动端浏览器
 
+## 🚀 开发与预览
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. 确保环境中有 `process.env.API_KEY` 以启用 AI 功能。
+2. 浏览器访问 `index.html` 即可进入控制台。
+3. 推荐使用 Chrome 开发者工具的“移动端模拟”模式（iPhone 14/15 尺寸）进行最佳体验。
