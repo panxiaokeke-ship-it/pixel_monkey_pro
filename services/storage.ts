@@ -1,5 +1,5 @@
 
-import { PixelArt } from '../types';
+import { PixelArt, Layer } from '../types';
 
 const STORAGE_KEY = 'pixel_monkey_arts';
 
@@ -16,7 +16,31 @@ export const saveArt = (art: PixelArt): void => {
 
 export const getAllArts = (): PixelArt[] => {
   const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+  
+  const arts: any[] = JSON.parse(data);
+  
+  // Migration for legacy single-layer data
+  return arts.map(art => {
+    if (art.data && !art.layers) {
+      const migratedArt: PixelArt = {
+        id: art.id,
+        name: art.name,
+        width: art.width,
+        height: art.height,
+        layers: [{
+          id: 'layer-1',
+          name: 'Layer 1',
+          data: art.data,
+          visible: true
+        }],
+        updatedAt: art.updatedAt,
+        preview: art.preview
+      };
+      return migratedArt;
+    }
+    return art as PixelArt;
+  });
 };
 
 export const getArtById = (id: string): PixelArt | undefined => {
@@ -35,9 +59,16 @@ export const createNewArt = (name: string, size: number): PixelArt => {
     name,
     width: size,
     height: size,
-    data: Array(size * size).fill('#ffffff'),
+    layers: [{
+      id: 'layer-1',
+      name: 'Layer 1',
+      data: Array(size * size).fill(null), // Start transparent
+      visible: true
+    }],
     updatedAt: Date.now(),
   };
+  // Pre-fill bottom layer if needed or keep it transparent
+  // For better UX, let's make the first layer white by default or just transparent
   saveArt(newArt);
   return newArt;
 };

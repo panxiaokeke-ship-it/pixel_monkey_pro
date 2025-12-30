@@ -3,12 +3,19 @@ export type ToolType = 'pen' | 'eraser' | 'fill' | 'picker' | 'pan';
 export type SymmetryMode = 'none' | 'vertical' | 'horizontal' | 'quad';
 export type ThemeType = 'gameboy' | 'cassette' | 'cyberpunk' | 'stealth';
 
+export interface Layer {
+  id: string;
+  name: string;
+  data: (string | null)[]; // null represents transparency
+  visible: boolean;
+}
+
 export interface PixelArt {
   id: string;
   name: string;
   width: number;
   height: number;
-  data: string[]; // Flat array of hex colors
+  layers: Layer[];
   updatedAt: number;
   preview?: string; // Base64 preview
 }
