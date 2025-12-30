@@ -21,10 +21,10 @@ interface EditorProps {
 const SidebarToolButton: React.FC<{ active: boolean, onClick: () => void, icon: React.ReactNode, label: string }> = ({ active, onClick, icon, label }) => (
   <button 
     onClick={onClick}
-    className={`w-full flex flex-col items-center justify-center py-4 border-4 transition-all relative ${active ? 'bg-[var(--accent-orange)] border-white text-white translate-x-1.5' : 'bg-white border-[var(--border-color)] text-[var(--text-color)] shadow-[4px_0_0_0_var(--panel-shadow)] hover:-translate-y-1'}`}
+    className={`w-full flex flex-col items-center justify-center py-4 border-4 transition-all relative ${active ? 'bg-[var(--accent-orange)] border-white text-white translate-x-1' : 'bg-white border-[var(--border-color)] text-[var(--text-color)] shadow-[2px_2px_0_0_var(--panel-shadow)] hover:bg-black/5'}`}
   >
     {icon}
-    <span className="text-[9px] font-black mt-2">{label}</span>
+    <span className="text-[9px] font-black mt-1 uppercase tracking-tighter">{label}</span>
   </button>
 );
 
@@ -35,26 +35,23 @@ const IconButton: React.FC<{ active?: boolean, onClick: () => void, icon: React.
     title={title}
   >
     {icon}
-    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity font-black uppercase whitespace-nowrap z-[100]">
-      {title}
-    </span>
   </button>
 );
 
 const ControlDeckButton: React.FC<{ active: boolean, onClick: () => void, icon: React.ReactNode, label: string }> = ({ active, onClick, icon, label }) => (
   <button 
     onClick={onClick}
-    className={`flex-1 flex flex-col items-center justify-center py-4 border-4 transition-all ${active ? 'bg-[var(--accent-orange)] border-white text-white translate-y-1 shadow-none' : 'bg-[var(--hardware-beige)] border-[var(--border-color)] text-[var(--text-color)] shadow-[0_4px_0_0_var(--panel-shadow)] active:translate-y-1 active:shadow-none'}`}
+    className={`flex-1 flex flex-col items-center justify-center py-3 border-4 transition-all ${active ? 'bg-[var(--accent-orange)] border-white text-white translate-y-0.5 shadow-none' : 'bg-[var(--hardware-beige)] border-[var(--border-color)] text-[var(--text-color)] shadow-[0_3px_0_0_var(--panel-shadow)] active:translate-y-0.5 active:shadow-none'}`}
   >
     {icon}
-    <span className="text-[10px] font-black mt-2 tracking-tight">{label}</span>
+    <span className="text-[9px] font-black mt-1 tracking-tight">{label}</span>
   </button>
 );
 
 const ThemeButton: React.FC<{ active: boolean, onClick: () => void, label: string, color: string }> = ({ active, onClick, label, color }) => (
-  <button onClick={onClick} className={`p-5 border-4 flex flex-col items-center gap-3 transition-all ${active ? 'border-[var(--accent-orange)] bg-white/10 scale-105 shadow-md' : 'border-[var(--panel-shadow)] opacity-50 hover:opacity-100'}`}>
-     <div className="w-10 h-10 border-4 border-black/30 shadow-inner" style={{ backgroundColor: color }}></div>
-     <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
+  <button onClick={onClick} className={`p-4 border-4 flex flex-col items-center gap-2 transition-all ${active ? 'border-[var(--accent-orange)] bg-white/10 scale-105 shadow-md' : 'border-[var(--panel-shadow)] opacity-50 hover:opacity-100'}`}>
+     <div className="w-8 h-8 border-2 border-black/30 shadow-inner" style={{ backgroundColor: color }}></div>
+     <span className="text-[9px] font-black uppercase">{label}</span>
   </button>
 );
 
@@ -409,37 +406,33 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
   return (
     <div className="flex h-screen bg-[var(--bg-color)] text-[var(--text-color)] theme-transition select-none overflow-hidden">
       
-      {/* Sidebar Tool (Left) - Compact and Fixed width on Desktop */}
-      <div className="hidden md:flex flex-col w-20 lg:w-28 bg-[var(--hardware-beige)] border-r-4 border-[var(--panel-shadow)] p-3 items-center gap-4 z-50 shrink-0">
-        <div className="flex flex-col items-center gap-1 opacity-20 mb-4">
-           {[...Array(6)].map((_, i) => <div key={i} className="w-8 h-1 bg-black/40 rounded-full"></div>)}
-        </div>
-
-        <button onClick={onBack} className="cassette-button p-3 hover:scale-110 transition-all mb-4">
+      {/* 桌面端左侧工具栏 (Sidebar Tool Left) */}
+      <div className="hidden md:flex flex-col w-16 lg:w-24 bg-[var(--hardware-beige)] border-r-4 border-[var(--panel-shadow)] p-2 lg:p-3 items-center gap-4 z-50 shrink-0 shadow-xl">
+        <button onClick={onBack} className="cassette-button p-2 lg:p-3 hover:scale-110 transition-all mb-4 mt-2">
           <ArrowLeft size={24} />
         </button>
-        <SidebarToolButton active={currentTool === 'pen'} onClick={() => setCurrentTool('pen')} icon={<PenTool size={28} />} label="PEN" />
-        <SidebarToolButton active={currentTool === 'eraser'} onClick={() => setCurrentTool('eraser')} icon={<Eraser size={28} />} label="DEL" />
-        <SidebarToolButton active={currentTool === 'fill'} onClick={() => setCurrentTool('fill')} icon={<PaintBucket size={28} />} label="FILL" />
-        <SidebarToolButton active={currentTool === 'picker'} onClick={() => setCurrentTool('picker')} icon={<Pipette size={28} />} label="PICK" />
-        <SidebarToolButton active={currentTool === 'pan'} onClick={() => setCurrentTool('pan')} icon={<Hand size={28} />} label="PAN" />
+        <SidebarToolButton active={currentTool === 'pen'} onClick={() => setCurrentTool('pen')} icon={<PenTool size={24} />} label="PEN" />
+        <SidebarToolButton active={currentTool === 'eraser'} onClick={() => setCurrentTool('eraser')} icon={<Eraser size={24} />} label="DEL" />
+        <SidebarToolButton active={currentTool === 'fill'} onClick={() => setCurrentTool('fill')} icon={<PaintBucket size={24} />} label="FILL" />
+        <SidebarToolButton active={currentTool === 'picker'} onClick={() => setCurrentTool('picker')} icon={<Pipette size={24} />} label="PICK" />
+        <SidebarToolButton active={currentTool === 'pan'} onClick={() => setCurrentTool('pan')} icon={<Hand size={24} />} label="PAN" />
         
         <div className="mt-auto flex flex-col gap-3 pb-4">
           <button onClick={() => setShowSettings(true)} className="p-3 border-2 border-[var(--border-color)] bg-[var(--hardware-beige)] hover:bg-black/10 transition-all rounded-sm shadow-[2px_2px_0_0_black]"><MoreHorizontal size={24} /></button>
         </div>
       </div>
 
-      {/* Main Content Area (Middle) */}
+      {/* 中间主内容区 (Middle Canvas Area) */}
       <div className="flex-1 flex flex-col h-full relative min-w-0">
-        {/* Header */}
-        <header className="p-4 bg-[var(--hardware-beige)] border-b-4 border-[var(--panel-shadow)] flex justify-between items-center text-[var(--text-color)] z-40 shrink-0">
+        {/* 顶部标题栏 */}
+        <header className="p-3 lg:p-4 bg-[var(--hardware-beige)] border-b-4 border-[var(--panel-shadow)] flex justify-between items-center text-[var(--text-color)] z-40 shrink-0">
           <div className="flex items-center gap-3">
             <button onClick={onBack} className="md:hidden cassette-button p-1">
               <ArrowLeft size={24} />
             </button>
-            <div className="flex flex-col md:flex-row md:items-center md:gap-4">
-              <h2 className="font-black italic uppercase text-sm md:text-xl truncate max-w-[120px] md:max-w-none tracking-tight">{art.name}</h2>
-              <span className="hidden sm:inline-block label-tag !text-[8px] md:!text-[10px]">UNIT: {art.width}x{art.height}</span>
+            <div className="flex flex-col md:flex-row md:items-baseline md:gap-4">
+              <h2 className="font-black italic uppercase text-sm lg:text-xl truncate max-w-[150px] lg:max-w-none tracking-tight">{art.name}</h2>
+              <span className="hidden sm:inline-block label-tag !text-[8px] lg:!text-[10px]">RES: {art.width}x{art.height}</span>
             </div>
           </div>
           <div className="flex gap-2">
@@ -456,8 +449,8 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
           </div>
         </header>
 
-        {/* Toolbar */}
-        <div className="bg-[var(--hardware-beige)]/60 backdrop-blur-md border-b-2 border-[var(--border-color)] p-2 flex items-center justify-center gap-2 overflow-x-auto no-scrollbar z-30 shrink-0">
+        {/* 画布操作快捷栏 (Compact Toolbar) */}
+        <div className="bg-[var(--hardware-beige)]/60 backdrop-blur-md border-b-2 border-[var(--border-color)] p-1.5 flex items-center justify-center gap-2 overflow-x-auto no-scrollbar z-30 shrink-0">
           <div className="flex bg-black/10 p-1 border-2 border-[var(--border-color)] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.5)]">
             <IconButton onClick={() => setZoom(prev => Math.min(prev * 1.2, 20))} icon={<ZoomIn size={18} />} title="Zoom In" />
             <IconButton onClick={() => setZoom(prev => Math.max(prev * 0.8, 0.5))} icon={<ZoomOut size={18} />} title="Zoom Out" />
@@ -480,10 +473,10 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
           </div>
         </div>
 
-        {/* Canvas Viewport - Now dynamically sized to fill middle column */}
+        {/* 画布主视口 (Viewport) - 现在自适应剩余空间 */}
         <div 
           ref={viewportRef}
-          className="flex-1 bg-[var(--monitor-bg)] flex items-center justify-center p-4 md:p-8 relative overflow-hidden touch-none"
+          className="flex-1 bg-[var(--monitor-bg)] flex items-center justify-center p-4 lg:p-8 relative overflow-hidden touch-none"
           onWheel={handleWheel}
           onMouseDown={startDragging}
           onMouseMove={onDrag}
@@ -493,39 +486,39 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
           onTouchMove={onDrag}
           onTouchEnd={stopDragging}
         >
+          {/* CRT 纹理装饰 */}
           <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'linear-gradient(var(--led-green) 1px, transparent 1px), linear-gradient(90deg, var(--led-green) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
           
           <div 
-            className="relative p-2 bg-[var(--hardware-beige)] border-4 border-[var(--border-color)] rounded-sm shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-transform duration-75 ease-out"
+            className="relative p-2 lg:p-4 bg-[var(--hardware-beige)] border-4 border-[var(--border-color)] rounded-sm shadow-[0_0_80px_rgba(0,0,0,0.6)] transition-transform duration-75 ease-out"
             style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
           >
              <canvas 
               ref={canvasRef}
               width={art.width}
               height={art.height}
-              className="w-[85vw] max-w-none md:w-[65vh] md:max-w-full aspect-square bg-white pointer-events-none shadow-sm"
+              className="w-[85vw] md:w-auto md:h-full md:max-h-[70vh] aspect-square bg-white pointer-events-none shadow-sm"
             />
             {symmetryMode !== 'none' && (
-              <div className="absolute inset-2 pointer-events-none z-30 opacity-40">
+              <div className="absolute inset-2 lg:inset-4 pointer-events-none z-30 opacity-40">
                 {(symmetryMode === 'vertical' || symmetryMode === 'quad') && <div className="absolute left-1/2 top-0 bottom-0 w-[2px] bg-[var(--accent-orange)] -translate-x-1/2"></div>}
                 {(symmetryMode === 'horizontal' || symmetryMode === 'quad') && <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-[var(--accent-orange)] -translate-y-1/2"></div>}
               </div>
             )}
             {showGrid && (
-              <div className="absolute inset-2 pointer-events-none z-20" style={{ backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.2) 1px, transparent 1px)`, backgroundSize: `${100 / art.width}% ${100 / art.height}%` }} />
+              <div className="absolute inset-2 lg:inset-4 pointer-events-none z-20" style={{ backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.2) 1px, transparent 1px)`, backgroundSize: `${100 / art.width}% ${100 / art.height}%` }} />
             )}
           </div>
 
-          <div className="absolute bottom-6 left-8 font-mono text-[9px] text-[var(--led-green)] font-black opacity-90 space-y-1 drop-shadow-[0_2px_4px_black] bg-black/30 p-3 border-l-4 border-[var(--led-green)] hidden lg:block">
-            <p className="tracking-widest uppercase mb-1 opacity-50">STATUS_FEED</p>
+          <div className="absolute bottom-4 left-6 font-mono text-[9px] text-[var(--led-green)] font-black opacity-80 drop-shadow-[0_2px_4px_black] bg-black/40 p-2 border-l-4 border-[var(--led-green)] hidden lg:block">
+            <p className="tracking-widest opacity-60">SYSTEM_FEED</p>
             <p>X_RES: {art.width}PX</p>
-            <p>Y_RES: {art.height}PX</p>
-            <p>ZOOM: {Math.round(zoom * 100)}%</p>
+            <p>MAG: {Math.round(zoom * 100)}%</p>
             <p>MOD: {symmetryMode.toUpperCase()}</p>
           </div>
         </div>
 
-        {/* Mobile Control Panel */}
+        {/* 移动端底部控制面板 (Mobile Only) */}
         <div className="md:hidden bg-[var(--hardware-beige)] border-t-8 border-[var(--panel-shadow)] p-4 safe-bottom text-[var(--text-color)] z-[100]">
           <div className="flex items-center gap-4 mb-4">
              <div className="flex-1 flex gap-2">
@@ -568,27 +561,27 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
         </div>
       </div>
 
-      {/* Desktop Right Sidebar - Integrated into Flex Flow */}
-      <div className="hidden md:flex flex-col w-72 lg:w-80 xl:w-96 bg-[var(--hardware-beige)] border-l-4 border-[var(--panel-shadow)] h-full p-6 z-40 shrink-0 shadow-[-10px_0_30px_rgba(0,0,0,0.1)] relative overflow-y-auto custom-scroll">
-           {/* Mechanical Detail */}
+      {/* 桌面端右侧常驻面板 (Desktop Panels Right) */}
+      <div className="hidden md:flex flex-col w-64 lg:w-80 bg-[var(--hardware-beige)] border-l-4 border-[var(--panel-shadow)] h-full p-4 lg:p-6 z-40 shrink-0 shadow-[-10px_0_30px_rgba(0,0,0,0.1)] relative overflow-y-auto">
+           {/* 装饰细节 */}
            <div className="absolute top-0 right-6 w-12 h-4 border-x-2 border-b-2 border-black/10 flex items-center justify-around px-1">
-             <div className="w-1.5 h-1.5 rounded-full bg-black/20"></div>
-             <div className="w-1.5 h-1.5 rounded-full bg-black/20"></div>
+             <div className="w-1 h-1 rounded-full bg-black/20"></div>
+             <div className="w-1 h-1 rounded-full bg-black/20"></div>
            </div>
 
            <div className="mb-8 mt-4">
-              <label className="block text-[10px] font-black uppercase mb-3 tracking-[0.2em] text-[var(--panel-shadow)]">SPECTRAL_INDEX</label>
+              <label className="block text-[10px] font-black uppercase mb-3 tracking-[0.2em] text-[var(--panel-shadow)]">ACTIVE_COLOR</label>
               <div 
                 className="w-full aspect-video border-4 border-[var(--border-color)] shadow-[inset_2px_4px_12px_rgba(0,0,0,0.4)] relative flex items-center justify-center group cursor-pointer mb-6"
                 style={{ backgroundColor: currentColor }}
                 onClick={() => (document.querySelector('input[type="color"]') as HTMLInputElement)?.click()}
               >
-                 <div className="bg-black/80 px-4 py-2 font-mono text-white text-[12px] font-black backdrop-blur-sm border-2 border-white/20 group-hover:scale-110 transition-transform shadow-2xl">
+                 <div className="bg-black/80 px-4 py-2 font-mono text-white text-[12px] font-black backdrop-blur-sm border-2 border-white/20 group-hover:scale-110 transition-transform">
                     {currentColor.toUpperCase()}
                  </div>
                  <input type="color" value={currentColor} onChange={(e) => setCurrentColor(e.target.value)} className="w-0 h-0 opacity-0 absolute" />
               </div>
-              <div className="grid grid-cols-5 gap-2.5">
+              <div className="grid grid-cols-5 gap-2">
                 {(aiTip?.palette || defaultPalette).map((c, i) => (
                   <button 
                     key={i} 
@@ -600,14 +593,14 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
               </div>
            </div>
 
-           <div className="flex-1 flex flex-col min-h-[300px] mb-8 bg-black/5 p-4 border-2 border-[var(--panel-shadow)] shadow-inner">
+           <div className="flex-1 flex flex-col min-h-[250px] mb-8 bg-black/5 p-4 border-2 border-[var(--panel-shadow)] shadow-inner">
               <div className="flex justify-between items-center mb-4 pb-2 border-b border-black/10">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--panel-shadow)]">DATA_LAYERS</label>
-                <button onClick={addLayer} className="p-2 bg-[var(--accent-orange)] text-white border-2 border-[var(--border-color)] hover:scale-110 shadow-[2px_2px_0_0_black] transition-all">
-                  <Plus size={18} />
+                <button onClick={addLayer} className="p-1.5 bg-[var(--accent-orange)] text-white border-2 border-[var(--border-color)] hover:scale-110 shadow-[2px_2px_0_0_black] transition-all">
+                  <Plus size={16} />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scroll">
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scroll">
                 {[...layers].reverse().map((layer, revIdx) => {
                   const index = layers.length - 1 - revIdx;
                   const isActive = activeLayerIndex === index;
@@ -615,19 +608,19 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
                     <div 
                       key={layer.id} 
                       onClick={() => setActiveLayerIndex(index)}
-                      className={`p-3 border-2 flex items-center gap-3 transition-all cursor-pointer ${isActive ? 'bg-[var(--accent-orange)] text-white border-white scale-[1.02] shadow-lg' : 'bg-white/60 border-[var(--border-color)] opacity-70 hover:opacity-100 hover:bg-white/90'}`}
+                      className={`p-2.5 border-2 flex items-center gap-2 transition-all cursor-pointer ${isActive ? 'bg-[var(--accent-orange)] text-white border-white scale-[1.02] shadow-lg' : 'bg-white/60 border-[var(--border-color)] opacity-70 hover:opacity-100 hover:bg-white/90'}`}
                     >
-                      <button onClick={(e) => { e.stopPropagation(); toggleLayerVisibility(index); }} className="p-1.5 hover:bg-black/10 rounded-sm">
-                        {layer.visible ? <Eye size={16} /> : <EyeOff size={16} />}
+                      <button onClick={(e) => { e.stopPropagation(); toggleLayerVisibility(index); }} className="p-1 hover:bg-black/10 rounded-sm">
+                        {layer.visible ? <Eye size={14} /> : <EyeOff size={14} />}
                       </button>
-                      <span className="text-[11px] font-black uppercase truncate flex-1 tracking-tight">{layer.name}</span>
+                      <span className="text-[10px] font-black uppercase truncate flex-1 tracking-tight">{layer.name}</span>
                       <div className="flex flex-col gap-1">
-                        <button onClick={(e) => { e.stopPropagation(); moveLayer(index, 'up'); }} className="p-0.5 hover:bg-black/10"><ArrowUp size={12} /></button>
-                        <button onClick={(e) => { e.stopPropagation(); moveLayer(index, 'down'); }} className="p-0.5 hover:bg-black/10"><ArrowDown size={12} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); moveLayer(index, 'up'); }} className="p-0.5 hover:bg-black/10"><ArrowUp size={10} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); moveLayer(index, 'down'); }} className="p-0.5 hover:bg-black/10"><ArrowDown size={10} /></button>
                       </div>
                       {layers.length > 1 && (
-                        <button onClick={(e) => { e.stopPropagation(); deleteLayer(index); }} className="p-1.5 text-red-600 hover:bg-red-50">
-                          <Trash2 size={16} />
+                        <button onClick={(e) => { e.stopPropagation(); deleteLayer(index); }} className="p-1 text-red-600 hover:bg-red-50">
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </div>
@@ -637,25 +630,21 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
            </div>
 
            <div className="space-y-6 pt-6 border-t-4 border-[var(--panel-shadow)]">
-              <div className="bg-[var(--hardware-dark)] p-5 border-2 border-[var(--border-color)] shadow-inner rounded-sm">
-                <div className="flex justify-between items-center mb-3">
-                   <span className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em] font-mono">BIT_SIZE</span>
-                   <span className="text-[11px] font-black text-[var(--led-green)] font-mono px-2 py-0.5 bg-white/5 border border-white/10">{brushSize}PX</span>
+              <div className="bg-[var(--hardware-dark)] p-4 border-2 border-[var(--border-color)] shadow-inner rounded-sm">
+                <div className="flex justify-between items-center mb-2">
+                   <span className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em] font-mono">BRUSH_SIZE</span>
+                   <span className="text-[10px] font-black text-[var(--led-green)] font-mono">{brushSize}PX</span>
                 </div>
                 <input 
                   type="range" min="1" max="10" value={brushSize} 
                   onChange={(e) => setBrushSize(parseInt(e.target.value))} 
-                  className="w-full accent-[var(--accent-orange)] h-2 bg-white/10 rounded-full appearance-none cursor-pointer"
+                  className="w-full accent-[var(--accent-orange)] h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer"
                 />
-                <div className="flex justify-between mt-2 text-[8px] font-black text-white/30 font-mono">
-                  <span>MIN: 1</span>
-                  <span>MAX: 10</span>
-                </div>
               </div>
 
-              <button onClick={handleSave} className="w-full bg-[var(--accent-orange)] text-white p-5 font-black uppercase border-4 border-[var(--border-color)] shadow-[6px_6px_0px_var(--border-color)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-4 text-xl tracking-tighter">
-                 {isSaving ? <Check size={28} /> : <Save size={28} />}
-                 <span>{isSaving ? 'SAVE_SUCCESS' : 'COMMIT_CHANGES'}</span>
+              <button onClick={handleSave} className="w-full bg-[var(--accent-orange)] text-white p-4 font-black uppercase border-4 border-[var(--border-color)] shadow-[4px_4px_0px_var(--border-color)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-3 text-lg tracking-tighter">
+                 {isSaving ? <Check size={24} /> : <Save size={24} />}
+                 <span>{isSaving ? 'SAVED' : 'COMMIT'}</span>
               </button>
            </div>
         </div>
@@ -735,7 +724,7 @@ export const Editor: React.FC<EditorProps> = ({ art, onBack, currentTheme, onSet
       {/* AI Inspiration Overlay */}
       {showInspiration && (
         <div className="fixed inset-0 bg-black/98 flex items-center justify-center p-6 z-[500]">
-           <div className="bg-black border-4 border-[var(--led-green)] p-10 w-full max-w-lg relative shadow-[0_0_60px_var(--led-green)]">
+           <div className="bg-black border-4 border-[var(--led-green)] p-8 lg:p-10 w-full max-w-lg relative shadow-[0_0_60px_var(--led-green)]">
               <div className="absolute -top-6 left-10 label-tag !bg-[var(--led-green)] !text-black !text-xs">NEURAL_LINK_ACTIVE</div>
               {aiTip ? (
                 <div className="space-y-10">
